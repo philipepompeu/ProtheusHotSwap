@@ -14,7 +14,9 @@ namespace ProtheusHotSwap
 
             try
             {
-                string currentEnv = File.ReadLines(@"C:\quente\rpo.txt").First();
+                string envFile = @"C:\quente\rpo.txt";
+
+                string currentEnv = File.ReadLines(envFile).First();
                 Console.WriteLine("RPO atual : " + currentEnv);
 
                 string newEnv = currentEnv.Trim() == "PRODUCAO2" ? "1" : "2";
@@ -61,6 +63,10 @@ namespace ProtheusHotSwap
                     File.Copy(arquivoOrigem, arquivoDestino, true);
 
                 }
+
+                arquivoOrigem = Path.Combine(dirNewEnv, Path.GetFileName(envFile));
+                Console.WriteLine("Atualizando o rpo.txt: " + arquivoOrigem + " substituir " + envFile);
+                File.Copy(arquivoOrigem, envFile, true);
 
                 Console.WriteLine("Ambiente foi alterado de: prod" + oriEnv + " para prod" + newEnv);
                 Console.WriteLine("Troca quente executada com sucesso.");
