@@ -9,6 +9,9 @@ namespace ProtheusHotSwap
 {
     class Program
     {
+
+        const string ProtheusDir = @"C:\Protheus 11\Protheus";
+
         static void Main(string[] args)
         {
 
@@ -21,50 +24,14 @@ namespace ProtheusHotSwap
 
                 string newEnv = currentEnv.Trim() == "PRODUCAO2" ? "1" : "2";
                 string oriEnv = currentEnv.Trim() == "PRODUCAO2" ? "2" : "1";
+                string dirNewEnv = Path.Combine(ProtheusDir, @"apo\prod" + newEnv + @"\");
 
-                string rpoCompilador = @"C:\Protheus 11\Protheus\apo\compilador\TTTP110.RPO";
+                TransfereRpos(dirNewEnv);
 
-                Console.WriteLine("RPO Compilador : " + rpoCompilador);
-
-                string dirNewEnv = @"C:\Protheus 11\Protheus\apo\prod" + newEnv + @"\";
-
-                Console.WriteLine("Atualizar RPOs contidos em : " + dirNewEnv);
-
-                string arquivoDestino = "";
-
-                foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
-                {
-                    arquivoDestino = Path.Combine(diretorio, Path.GetFileName(rpoCompilador));
-
-                    Console.WriteLine("Copiando para : " + arquivoDestino);
-                    File.Copy(rpoCompilador, arquivoDestino, true);
-                }
-
-                string arquivoOrigem = "";
                 dirNewEnv = @"C:\quente\bin\prod" + newEnv;
-                Console.WriteLine("Atualizar INIs contidos em : " + dirNewEnv);
-                foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
-                {
-                    arquivoOrigem = Path.Combine(diretorio, "appserver.ini");
-                    string temp = Path.GetDirectoryName(arquivoOrigem);
-                    temp = temp.Substring(temp.LastIndexOf(@"\") + 1);
-
-                    arquivoDestino = @"C:\Protheus 11\Protheus\bin\appserver";
-
-                    if (temp.ElementAt(0) == 's')
-                    {
-                        temp = "S" + temp.Substring(1);
-                        arquivoDestino += "_" + temp;
-                    }
-
-                    arquivoDestino = Path.Combine(arquivoDestino, Path.GetFileName(arquivoOrigem));
-
-                    Console.WriteLine("Copiando para : " + arquivoDestino);
-                    File.Copy(arquivoOrigem, arquivoDestino, true);
-
-                }
-
-                arquivoOrigem = Path.Combine(dirNewEnv, Path.GetFileName(envFile));
+                TransfereInis(dirNewEnv);
+               
+                string arquivoOrigem = Path.Combine(dirNewEnv, Path.GetFileName(envFile));
                 Console.WriteLine("Atualizando o rpo.txt: " + arquivoOrigem + " substituir " + envFile);
                 File.Copy(arquivoOrigem, envFile, true);
 
@@ -79,6 +46,55 @@ namespace ProtheusHotSwap
             }            
             
             Console.ReadKey();
+        }
+
+        public static void TransfereRpos(string dirNewEnv)
+        {
+            string rpoCompilador = Path.Combine(ProtheusDir, @"apo\compilador\TTTP110.RPO"); 
+            Console.WriteLine("RPO Compilador : " + rpoCompilador);            
+
+            Console.WriteLine("Atualizar RPOs contidos em : " + dirNewEnv);
+
+            string arquivoDestino = "";
+
+            foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
+            {
+                arquivoDestino = Path.Combine(diretorio, Path.GetFileName(rpoCompilador));
+
+                Console.WriteLine("Copiando para : " + arquivoDestino);
+                File.Copy(rpoCompilador, arquivoDestino, true);
+            }
+
+        }
+
+        public static void TransfereInis(string dirNewEnv)
+        {
+            string arquivoDestino = "";
+            string arquivoOrigem = "";
+            string temp = "";
+            Console.WriteLine("Atualizar INIs contidos em : " + dirNewEnv);
+
+            foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
+            {
+                arquivoOrigem = Path.Combine(diretorio, "appserver.ini");
+                temp = Path.GetDirectoryName(arquivoOrigem);
+                temp = temp.Substring(temp.LastIndexOf(@"\") + 1);
+
+                arquivoDestino = Path.Combine(ProtheusDir, @"bin\appserver");
+
+                if (temp.ElementAt(0) == 's')
+                {
+                    temp = "S" + temp.Substring(1);
+                    arquivoDestino += "_" + temp;
+                }
+
+                arquivoDestino = Path.Combine(arquivoDestino, Path.GetFileName(arquivoOrigem));
+
+                Console.WriteLine("Copiando para : " + arquivoDestino);
+                File.Copy(arquivoOrigem, arquivoDestino, true);
+
+            }
+
         }
     }
 }
