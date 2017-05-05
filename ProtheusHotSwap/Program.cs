@@ -26,13 +26,12 @@ namespace ProtheusHotSwap
                 string oriEnv = currentEnv.Trim() == "PRODUCAO2" ? "2" : "1";                
                 string dirNewEnv = Path.Combine(config.CaminhoProtheus, @"apo\prod" + newEnv + @"\");
 
-                TransfereRpos(dirNewEnv, config);
-
-                dirNewEnv = @"C:\quente\bin\prod" + newEnv;
+                TransfereRpos(dirNewEnv, config);                
+                dirNewEnv = Path.Combine(config.CaminhoInis, @"prod" + newEnv);
                 TransfereInis(dirNewEnv, config);
 
                 config.AmbienteAtual = "PRODUCAO" + newEnv;
-                File.WriteAllText(envFile, JsonConvert.SerializeObject(config));
+                File.WriteAllText(envFile, JsonConvert.SerializeObject(config, Formatting.Indented));
                 
                 Console.WriteLine("Atualizando o rpo.json: " + newEnv + " substituir " + oriEnv);                
 

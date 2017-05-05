@@ -12,6 +12,7 @@ namespace ProtheusHotSwap
     {
         public string AmbienteAtual { get; set; }
         public string CaminhoProtheus { get; set; }
+        public string CaminhoInis { get; set; }
         public string RpoBase { get; set; }
 
         public static Configuracao ObterConfiguracao(string configFile)
@@ -22,11 +23,12 @@ namespace ProtheusHotSwap
                 config = new Configuracao()
                 {
                     AmbienteAtual = "PRODUCAO1",
+                    CaminhoInis = @"C:\quente\bin\",
                     CaminhoProtheus = @"C:\Protheus 11\Protheus",
                     RpoBase = @"apo\compilador\TTTP110.RPO"
                 };
-
-                string json = JsonConvert.SerializeObject(config);
+                
+                string json = JsonConvert.SerializeObject(config,Formatting.Indented);
                 File.WriteAllText(configFile, json);
             }
             else
