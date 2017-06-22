@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace ProtheusHotSwap
 {
-    class Configuracao
+    public class Configuracao
     {
         public string AmbienteAtual { get; set; }
         public string CaminhoProtheus { get; set; }
         public string CaminhoInis { get; set; }
         public string RpoBase { get; set; }
+        private string AmbienteOriginal { get; set; }
 
         public static Configuracao ObterConfiguracao(string configFile)
         {
@@ -40,6 +41,34 @@ namespace ProtheusHotSwap
                 }
             }
             return config;
+        }
+
+        private Configuracao() {
+
+
+        }
+
+        private string GetCurrentEnv() {            
+            return this.AmbienteAtual.Trim() == "PRODUCAO2" ? "2" : "1";
+        }
+
+        private string GetNextEnv()
+        {
+            return this.AmbienteAtual.Trim() == "PRODUCAO2" ? "1" : "2";
+        }
+
+        public string GetNextEnvDir() {
+
+            return Path.Combine(this.CaminhoProtheus, @"apo\prod" + this.GetNextEnv() + @"\");
+        }
+
+        public string GetNewInisDir() {
+            return Path.Combine(this.CaminhoInis, @"prod" + this.GetNextEnv());
+        }
+
+        public void ReverseEnv()
+        {
+            this.AmbienteAtual = "PRODUCAO" + this.GetNextEnv();
         }
     }
 }
