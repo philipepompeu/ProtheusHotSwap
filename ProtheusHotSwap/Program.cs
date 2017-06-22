@@ -13,87 +13,43 @@ namespace ProtheusHotSwap
         static void Main(string[] args)
         {
 
+            bool shouldWait = false;
+            shouldWait = !(args.Length > 0);
+
             try
             {
                 string envFile = @"rpo.json";
 
-                Configuracao config = Configuracao.ObterConfiguracao(envFile);                
+                Configuracao config = Configuracao.ObterConfiguracao(envFile);
 
-                string currentEnv = config.AmbienteAtual;
-                Console.WriteLine("RPO atual : " + currentEnv);
+                Console.WriteLine("RPO atual : " + config.AmbienteAtual);
 
-                string newEnv = currentEnv.Trim() == "PRODUCAO2" ? "1" : "2";
-                string oriEnv = currentEnv.Trim() == "PRODUCAO2" ? "2" : "1";                
-                string dirNewEnv = Path.Combine(config.CaminhoProtheus, @"apo\prod" + newEnv + @"\");
+                HotSwap program = new HotSwap(config);
 
-                TransfereRpos(dirNewEnv, config);                
-                dirNewEnv = Path.Combine(config.CaminhoInis, @"prod" + newEnv);
-                TransfereInis(dirNewEnv, config);
+                program.Execute();
 
-                config.AmbienteAtual = "PRODUCAO" + newEnv;
-                File.WriteAllText(envFile, JsonConvert.SerializeObject(config, Formatting.Indented));
-                
-                Console.WriteLine("Atualizando o rpo.json: " + newEnv + " substituir " + oriEnv);                
+                string oriEnv = config.AmbienteAtual;
 
-                Console.WriteLine("Ambiente foi alterado de: prod" + oriEnv + " para prod" + newEnv);
+                config.ReverseEnv();
+
+                string newEnv = config.AmbienteAtual;
+
+                File.WriteAllText(envFile, JsonConvert.SerializeObject(config, Formatting.Indented));                            
+
+                Console.WriteLine("Ambiente foi alterado de: " + oriEnv + " para " + newEnv);
                 Console.WriteLine("Troca quente executada com sucesso.");
             }
             catch (Exception e)
             {
                 Console.WriteLine("Um erro inesperado ocorreu. Log abaixo:");
                 Console.WriteLine(e.Message);
-            }            
-            
-            Console.ReadKey();
-        }        
-
-        public static void TransfereRpos(string dirNewEnv, Configuracao config)
-        {
-            string rpoCompilador = Path.Combine(config.CaminhoProtheus, config.RpoBase); 
-            Console.WriteLine("RPO Compilador : " + rpoCompilador);            
-
-            Console.WriteLine("Atualizar RPOs contidos em : " + dirNewEnv);
-
-            string arquivoDestino = "";
-
-            foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
-            {
-                arquivoDestino = Path.Combine(diretorio, Path.GetFileName(rpoCompilador));
-
-                Console.WriteLine("Copiando para : " + arquivoDestino);
-                File.Copy(rpoCompilador, arquivoDestino, true);
             }
 
-        }
-
-        public static void TransfereInis(string dirNewEnv, Configuracao config)
-        {
-            string arquivoDestino = "";
-            string arquivoOrigem = "";
-            string temp = "";
-            Console.WriteLine("Atualizar INIs contidos em : " + dirNewEnv);
-
-            foreach (var diretorio in Directory.GetDirectories(dirNewEnv))
+            if (shouldWait)
             {
-                arquivoOrigem = Path.Combine(diretorio, "appserver.ini");
-                temp = Path.GetDirectoryName(arquivoOrigem);
-                temp = temp.Substring(temp.LastIndexOf(@"\") + 1);
-
-                arquivoDestino = Path.Combine(config.CaminhoProtheus, @"bin\appserver");
-
-                if (temp.ElementAt(0) == 's')
-                {
-                    temp = "S" + temp.Substring(1);
-                    arquivoDestino += "_" + temp;
-                }
-
-                arquivoDestino = Path.Combine(arquivoDestino, Path.GetFileName(arquivoOrigem));
-
-                Console.WriteLine("Copiando para : " + arquivoDestino);
-                File.Copy(arquivoOrigem, arquivoDestino, true);
-
+                Console.ReadKey();
             }
-
         }
+        
     }
 }
